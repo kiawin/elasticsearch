@@ -48,15 +48,51 @@ final class GrokMatchGroup {
     }
 
     public Object getValue() {
-        if (groupValue == null) { return null; }
+        /**
+         * raw log may return "-" value for number-type field.
+         */
+        if (groupValue == null || "-".equals(groupValue)) { return null; }
 
         switch(type) {
             case "int":
-                return Integer.parseInt(groupValue);
+                int returnIntValue = 0;
+                for (String v : getSeparatedValues(groupValue)) {
+                    returnIntValue += Integer.parseInt(v.trim());
+                }
+                return returnIntValue;
             case "float":
-                return Float.parseFloat(groupValue);
+                float returnFloatValue = 0;
+                for (String v : getSeparatedValues(groupValue)) {
+                    returnFloatValue += Float.parseFloat(v.trim());
+                }
+                return returnFloatValue;
+            case "long":
+                long returnLongValue = 0;
+                for (String v : getSeparatedValues(groupValue)) {
+                    returnLongValue += Long.parseLong(v.trim());
+                }
+                return returnLongValue;
             default:
                 return groupValue;
+        }
+    }
+
+    private String[] getSeparatedValues(String groupValue) {
+        /**
+         * $upstream_response_time
+         *   keeps time spent on receiving the response from the upstream server;
+         *   the time is kept in seconds with millisecond resolution. Times of
+         *   several responses are separated by commas and colons like addresses
+         *   in the $upstream_addr variable.
+         */
+
+        if (groupValue.contains(",")) {
+            return groupValue.split(",");
+        } else if (groupValue.contains(":")) {
+            return groupValue.split(":");
+        } else {
+            String[] parts = {groupValue};
+            return parts;
         }
     }
 }
