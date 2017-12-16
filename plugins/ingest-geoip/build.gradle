@@ -23,13 +23,13 @@ esplugin {
 }
 
 dependencies {
-  compile ('com.maxmind.geoip2:geoip2:2.8.0')
+  compile ('com.maxmind.geoip2:geoip2:2.10.0')
   // geoip2 dependencies:
   compile('com.fasterxml.jackson.core:jackson-annotations:2.8.2')
   compile('com.fasterxml.jackson.core:jackson-databind:2.8.2')
   compile('com.maxmind.db:maxmind-db:1.2.1')
 
-  testCompile 'org.elasticsearch:geolite2-databases:20160608'
+  testCompile 'org.elasticsearch:geolite2-databases:20170704'
 }
 
 task copyDefaultGeoIp2DatabaseFiles(type: Copy) {
