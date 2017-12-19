@@ -48,6 +48,15 @@ public final class ConvertProcessor extends AbstractProcessor {
                 }
 
             }
+        }, LONG {
+            @Override
+            public Object convert(Object value) {
+                try {
+                    return Long.parseLong(value.toString());
+                } catch(NumberFormatException e) {
+                    throw new IllegalArgumentException("unable to convert [" + value + "] to long", e);
+                }
+            }
         }, FLOAT {
             @Override
             public Object convert(Object value) {
@@ -84,6 +93,9 @@ public final class ConvertProcessor extends AbstractProcessor {
                 } catch (IllegalArgumentException e) { }
                 try {
                     return INTEGER.convert(value);
+                } catch (IllegalArgumentException e) {}
+                try {
+                    return LONG.convert(value);
                 } catch (IllegalArgumentException e) {}
                 try {
                     return FLOAT.convert(value);
@@ -149,6 +161,12 @@ public final class ConvertProcessor extends AbstractProcessor {
             return;
         } else if (oldValue == null) {
             throw new IllegalArgumentException("Field [" + field + "] is null, cannot be converted to type [" + convertType + "]");
+        } else if (oldValue.equals("-") || oldValue.equals("")) {
+            /**
+             * raw log may return "-" value for number-type field.
+             */
+            document.setFieldValue(targetField, null);
+            return;
         }
 
         if (oldValue instanceof List) {

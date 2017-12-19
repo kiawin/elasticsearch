@@ -51,25 +51,36 @@ final class GrokMatchGroup {
         /**
          * raw log may return "-" value for number-type field.
          */
-        if (groupValue == null || "-".equals(groupValue)) { return null; }
+        if (groupValue == null || "-".equals(groupValue) || "".equals(groupValue)) { return null; }
+
+        String[] values = getSeparatedValues(groupValue);
+        if (isSeparatedValuesEmpty(values)) {
+            return null;
+        }
 
         switch(type) {
             case "int":
                 int returnIntValue = 0;
-                for (String v : getSeparatedValues(groupValue)) {
-                    returnIntValue += Integer.parseInt(v.trim());
+                for (String v : values) {
+                    if (isNotValueEmpty(v)) {
+                        returnIntValue += Integer.parseInt(v.trim());
+                    }
                 }
                 return returnIntValue;
             case "float":
                 float returnFloatValue = 0;
-                for (String v : getSeparatedValues(groupValue)) {
-                    returnFloatValue += Float.parseFloat(v.trim());
+                for (String v : values) {
+                    if (isNotValueEmpty(v)) {
+                        returnFloatValue += Float.parseFloat(v.trim());
+                    }
                 }
                 return returnFloatValue;
             case "long":
                 long returnLongValue = 0;
-                for (String v : getSeparatedValues(groupValue)) {
-                    returnLongValue += Long.parseLong(v.trim());
+                for (String v : values) {
+                    if (isNotValueEmpty(v)) {
+                        returnLongValue += Long.parseLong(v.trim());
+                    }
                 }
                 return returnLongValue;
             default:
@@ -94,5 +105,23 @@ final class GrokMatchGroup {
             String[] parts = {groupValue};
             return parts;
         }
+    }
+
+    private boolean isNotValueEmpty(String value) {
+        return !("-".equals(value.trim()) || "".equals(value.trim()));
+    }
+
+    private boolean isSeparatedValuesEmpty(String[] values) {
+        /**
+         * It is possible for $upstream_response_time to return with comma/colon separated values,
+         * where one or more of its values are "-"
+         */
+        int nullCount = 0;
+        for (String v : values) {
+            if (!isNotValueEmpty(v)) {
+                nullCount++;
+            }
+        }
+        return values.length == nullCount;
     }
 }
